@@ -37,35 +37,53 @@ var wscounter = 0;
 var socket;
 
 function debug(str) {
-    var debugDiv = document.getElementById('debug');
-    debugDiv.innerHTML = "" + str;
+    // var debugDiv = document.getElementById('debug');
+    // debugDiv.innerHTML = "" + str;
 }
 debug("Test");
 
 world = {};
 
-//XXX: TODO Make this prettier!
-function drawCircle(context,entity) {
-    with(context) {
+// //XXX: TODO Make this prettier!
+function drawSquare(context, entity) {
+    with (context) {
         // vuihon
-        beginPath();                
+        beginPath();
         lineWidth = 3;
         var x = entity["x"];
         var y = entity["y"];
-        //moveTo(x,y);
+        var size = (entity["size"]) ? entity["size"] : 8; 
+        var halfSize = size / 2; // Half of the size to calculate corner coordinates
+        
+        // Calculate corner coordinates of the square
+        var topLeftX = x - halfSize;
+        var topLeftY = y - halfSize;
+        var topRightX = x + halfSize;
+        var topRightY = y - halfSize;
+        var bottomLeftX = x - halfSize;
+        var bottomLeftY = y + halfSize;
+        var bottomRightX = x + halfSize;
+        var bottomRightY = y + halfSize;
+        
+        // Draw the square
         fillStyle = entity["colour"];
         strokeStyle = fillStyle;
-        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
-        stroke();                                
+        moveTo(topLeftX, topLeftY);
+        lineTo(topRightX, topRightY);
+        lineTo(bottomRightX, bottomRightY);
+        lineTo(bottomLeftX, bottomLeftY);
+        lineTo(topLeftX, topLeftY);
+        stroke();
+        fill();
     }
 }
 
 function prepEntity(entity) {
     if (!entity["colour"]) {
-        entity["colour"] = "#FF0000";
+        entity["colour"] = "#FFFFFF";
     }
     if (!entity["radius"]) {
-        entity["radius"] = 50;
+        entity["radius"] = 8;
     }
     return entity;
 }
@@ -84,7 +102,7 @@ function renderFrame() {
     clearFrame();
     for (var key in world) {
         var entity = world[key];
-        drawCircle(context,prepEntity(entity));
+        drawSquare(context,prepEntity(entity));
     }
 }
 
@@ -124,13 +142,9 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
-    drawNextFrame(); // (but should we?)
+    // drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
-    socket.send( JSON.stringify(world))
-    // for (var key in world) {
-    //     var entity = world[key];
-    //     drawCircle(context,prepEntity(entity));
-    // }
+    socket.send( JSON.stringify(world ))
 }
 var counter = 0;
 function addEntityWithoutName(data) {
@@ -246,12 +260,12 @@ mouse.mouseuppers.push(function(x,y,clicked,e) {
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
     addEntityWithoutName({'x':x,'y':y,'colour':'green',
-                          'radius':10});
+                          'radius':3});
 });
 
 
 function update() {
-    drawFrame();
+    renderFrame();
 }
 
 function wsSetup() {
