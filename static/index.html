@@ -123,7 +123,7 @@ function getPosition(e) {
 }
 
 function addEntity(entity, data) {
-    world[entity] = data;
+    // world[entity] = data;
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
 }
@@ -262,7 +262,11 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
-            //XXX: TODO What are you going to do here?            
+            //XXX: TODO What are you going to do here?
+            var message = JSON.parse(msg.data);
+            for (key in message) {
+                world[key] = message[key];
+            }     
         } catch (e) {
             alert("socket on message: " + e);
         }
